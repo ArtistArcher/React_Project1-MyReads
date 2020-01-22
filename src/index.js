@@ -5,7 +5,7 @@ import App from './App'
 import './index.css'
 
 ReactDOM.render(
-  <!-- Wrapping App in BrowserRouter -->
+  // Wrapping App in BrowserRouter
   <BrowserRouter>
     <App />
   </BrowserRouter>,
