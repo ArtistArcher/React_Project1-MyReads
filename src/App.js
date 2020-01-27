@@ -1,66 +1,93 @@
-import React from 'react';
-import { Route, Switch, Link } from 'react-router-dom';
-import * as BooksAPI from './BooksAPI';
-import './App.css';
-import BookList from './BookList';
-import Search from './Search';
-import MissingPage from './MissingPage';
+// App.js
+// import React from 'react'
+import React, { Component } from 'react'
+import { Route } from 'react-router-dom'
+import * as BooksAPI from './BooksAPI'
+import './App.css'
+// import Components
+import ListBooks from './ListBooks'
+import Search from './Search'
 
-class BooksApp extends React.Component {
-  state = { books: [] };
-
-  componentDidMount() {
-    // if mount get books
-    BooksAPI.getAll().then(books => this.setState({ books }));
-  }
-
-  changeShelf = (changedBook, shelf) => {
-    BooksAPI.update(changedBook, shelf).then(response => {
-      // assign shelf for books
-      changedBook.shelf = shelf;
-      // update state with changed book
-      this.setState(prevState => ({
-        books: prevState.books
-          // remove updated book from array
-          .filter(book => book.id !== changedBook.id)
-          // add updated book to array
-          .concat(changedBook)
-      }));
-    });
+// Define BooksApp
+class BooksApp extends Component {
+  // Define Book Shelves
+  bookshelves = [
+    { key: 'currentlyReading', name: 'Currently Reading' },
+    { key: 'wantToRead', name: 'Want to Read' },
+    { key: 'read', name: 'Read' },
+  ]
+  
+  // Setup States for BooksApp
+  state = {
+    books: [],
+    bookSearch: [],
+    myBooks: [],
+    searchBooks: [],
   };
 
-  render() {
-    const { books } = this.state;
+  // Check to see if Component Did Mount
+  componentDidMount = () => {
+    BooksAPI.getAll().then(books => {
+      this.setState({books: books})
+    })
+    //console.log("Did Mount");
+  }
 
+  // Function: Switch Shelf
+  switchShelf = (book, shelf) => {
+    if (shelf === 'none') {
+      this.setState(prevState => ({
+        books: prevState.books.filter(b => b.id !== book.id)
+      }))
+    } else {
+      book.shelf = shelf
+      this.setState(prevState => ({
+        books: prevState.books.filter(b => b.id !== book.id).concat(book)
+      }))
+    }
+  }
+
+  // Function: Search for Books
+  searchFor = query => {
+    if(query.length <= 0) {
+      this.setState({bookSearch: []})
+    }
+    else {  
+      BooksAPI.search(query).then(books => {
+        if(books.error) {
+          this.setState({bookSearch: []})
+        }
+        else {
+          this.setState({bookSearch: books})
+        }
+      })
+    }
+  }
+
+  // Function: Reset Search
+  resetSearch = () => {
+    this.setState({bookSearch: []})
+  }
+
+  render() {
+    const { books, bookSearch } = this.state
     return (
-      <div className="app">
-        <Switch>
-          <Route
-            path="/search"
-            render={() => (
-              <Search books={books} changeShelf={this.changeShelf} />
-            )}
-          />
-          <Route
-            exact
-            path="/"
-            render={() => (
-              <div className="list-books">
-                <div className="list-books-title">
-                  <h1>MyReads</h1>
-                </div>
-                <BookList books={books} changeShelf={this.changeShelf} />
-                <div className="open-search">
-                  <Link to="/search">Search</Link>
-                </div>
-              </div>
-            )}
-          />
-          <Route component={MissingPage} />
-        </Switch>
-      </div>
-    );
+     <div className="app">
+      {/* Show page based on URL*/}
+       <Route exact path="/" render={() => (
+            <ListBooks bookshelves={this.bookshelves} books={books} onMove={this.switchShelf}/>
+          )}/>
+       <Route exact path="/search" render={() => <Search 
+              bookSearch={bookSearch}
+              myBooks={books}
+              onSearch={this.searchFor}
+              onMove={this.switchShelf}
+              onResetSearch={this.resetSearch}/>}
+       />
+     </div>
+    )
   }
 }
 
-export default BooksApp;
+
+export default BooksApp
