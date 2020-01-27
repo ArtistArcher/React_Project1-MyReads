@@ -20,6 +20,16 @@ npm start
 
 A new browser window should automatically open displaying the app. If it doesn't, navigate to [http://localhost:3000/](http://localhost:3000/) in your browser
 
+## Sources of Reference
+
+Special thanks to these resources:
+
+* [React Article: Thinking in React](https://reactjs.org/docs/thinking-in-react.html) 
+* [Robin Wieruch's Site](https://www.robinwieruch.de/react-pass-props-to-component) 
+* [Tiago's Blog](https://www.tiagofsanchez.com/) 
+* [James Priest's Project Notes](https://james-priest.github.io/reactnd-project-myreads) 
+* [Sarah Maris' GitHub Project](https://github.com/sarah-maris/reactnd-project-myreads) 
+
 
 
 ## Original README preserved

@@ -1,78 +1,73 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import Book from './Book';
-import * as BooksAPI from './BooksAPI';
+// Search.js
+import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
+import Book from './Book'
 
 class Search extends Component {
-  static propTypes = {
-    books: PropTypes.array.isRequired,
-    changeShelf: PropTypes.func.isRequired
-  };
-
-  state = {
-    query: '',
-    newBooks: [],
-    searchErr: false
-  };
-
-  getBooks = event => {
-    const query = event.target.value;
-    this.setState({ query });
-
-    // if user input => run the search
-    if (query) {
-      BooksAPI.search(query.trim(), 20).then(books => {
-        books.length > 0
-          ? this.setState({ newBooks: books, searchErr: false })
-          : this.setState({ newBooks: [], searchErr: true });
-      });
-
-      // if query is empty => reset state to default
-    } else this.setState({ newBooks: [], searchErr: false });
-  };
-
   render() {
-    const { query, newBooks, searchErr } = this.state;
-    const { books, changeShelf } = this.props;
-
+    const {bookSearch, onSearch, onResetSearch, books, /*myBooks,*/ onMove,} = this.props
+    console.log('bookSearch is ' + books)
+    /*console.log('myBooks is ' + myBooks)*/
     return (
       <div className="search-books">
-        <div className="search-books-bar">
-          <Link className="close-search" to="/">
-            Close
-          </Link>
-          <div className="search-books-input-wrapper">
-            <input
-              type="text"
-              placeholder="Search by title or author"
-              value={query}
-              onChange={this.getBooks}
-            />
-          </div>
-        </div>
-        <div className="search-books-results">
-          {newBooks.length > 0 && (
-            <div>
-              <h3>Search returned {newBooks.length} books </h3>
-              <ol className="books-grid">
-                {newBooks.map(book => (
-                  <Book
-                    book={book}
-                    books={books}
-                    key={book.id}
-                    changeShelf={changeShelf}
-                  />
-                ))}
-              </ol>
-            </div>
-          )}
-          {searchErr && (
-            <h3>Search did not return any books. Please try again!</h3>
-          )}
-        </div>
+        <SearchBar onSearch={onSearch} onResetSearch={onResetSearch}/>
+        <SearchResults bookSearch={bookSearch} myBooks={bookSearch} onMove={onMove}/>
       </div>
     );
   }
 }
-export default Search;
+
+class SearchBar extends Component {
+  state = {
+    value: '',
+  }
+  manageChange = event => {
+    const v = event.target.value
+    this.setState({ value: v }, () => {
+      this.props.onSearch(v)
+    })
+  }
+  render() {
+    const {onResetSearch} = this.props
+    return(
+      <div className="search-books-bar">
+        <Link to="/">
+          <button className="close-search" onClick={onResetSearch}>Close</button>
+        </Link>
+        <div className="search-books-input-wrapper">
+          <input type="text" placeholder="Search by title or author"
+            value={this.state.value}
+            onChange={this.manageChange}
+            autoFocus />
+        </div>
+      </div>
+    )
+  }
+}
+
+class SearchResults extends Component {
+  render() {
+    const {bookSearch, myBooks, onMove} = this.props;
+    console.log('bookSearch is ' + bookSearch)
+    const updatedBooks = bookSearch.map(book => {
+      myBooks.map(b => {
+        if (b.id === book.id) {
+          book.shelf = b.shelf;
+        }
+        return b;
+      });
+      return book;
+    });
+    return(
+      <div className="search-books-results">
+        <ol className="books-grid">
+        {updatedBooks.map(book => (
+          <Book key={book.id} book={book} shelf={book.shelf ? book.shelf : "none"} onMove={onMove}/>
+        ))}
+        </ol>
+      </div>
+    )
+  }
+}
+
+export default Search
