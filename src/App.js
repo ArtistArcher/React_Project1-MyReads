@@ -8,53 +8,45 @@ import './App.css'
 import ListBooks from './ListBooks'
 import Search from './Search'
 
+
 // Define BooksApp
 class BooksApp extends Component {
-  // Define Book Shelves
-  bookshelves = [
-    { key: 'currentlyReading', name: 'Currently Reading' },
-    { key: 'wantToRead', name: 'Want to Read' },
-    { key: 'read', name: 'Read' },
-  ]
-  
-  // Setup States for BooksApp
   state = {
     books: [],
     bookSearch: [],
-    myBooks: [],
-    searchBooks: [],
-  };
+  }
 
-  // Check to see if Component Did Mount
-  componentDidMount = () => {
+  // Lifecycle Event After Component Mounts
+  componentDidMount() {
     BooksAPI.getAll().then(books => {
-      this.setState({books: books})
+      this.setState(prevState => ({
+        ...prevState,
+        books
+      }))
     })
-    //console.log("Did Mount");
   }
 
   // Function: Switch Shelf
   switchShelf = (book, shelf) => {
-    if (shelf === 'none') {
-      this.setState(prevState => ({
-        books: prevState.books.filter(b => b.id !== book.id)
-      }))
-    } else {
-      book.shelf = shelf
-      this.setState(prevState => ({
-        books: prevState.books.filter(b => b.id !== book.id).concat(book)
-      }))
+    if(book.shelf !== shelf) {
+      BooksAPI.update(book, shelf).then(() => {
+        book.shelf = shelf
+        this.setState(prevState => ({
+          books: prevState.books.filter(b => b.id !== book.id).concat(book)
+        }))
+      })
     }
   }
 
-  // Function: Search for Books
-  searchFor = query => {
+  // Function: Search Books
+
+  searchBooks = query => {
     if(query.length <= 0) {
       this.setState({bookSearch: []})
     }
-    else {  
-      BooksAPI.search(query).then(books => {
-        if(books.error) {
+    else {
+      BooksAPI.search(query).then(books =>{
+        if(!books || books.error) {
           this.setState({bookSearch: []})
         }
         else {
@@ -63,27 +55,50 @@ class BooksApp extends Component {
       })
     }
   }
-
-  // Function: Reset Search
-  resetSearch = () => {
+/*
+  searchBooks = query => {
+    if(query.length <= 0) {
+      this.setState({bookSearch: []})
+    }
+    else {
+      BooksAPI.search(query).then(books =>{
+        if(!books || books.error) {
+          this.setState({bookSearch: []})
+        }
+        else {
+          this.setState({bookSearch: books})
+        }
+        if (this.state.books.id === books.id) {
+                    books.shelf = this.state.books.shelf
+        }
+        return books.shelf
+      })
+    }
+  }
+*/
+  // Function: Clear Search Results
+  clearSearch = () => {
     this.setState({bookSearch: []})
   }
 
+
   render() {
-    const { books, bookSearch } = this.state
+    const {books, bookSearch} = this.state
     return (
      <div className="app">
       {/* Show page based on URL*/}
        <Route exact path="/" render={() => (
-            <ListBooks bookshelves={this.bookshelves} books={books} onMove={this.switchShelf}/>
+         <ListBooks books={books} onMove={this.switchShelf}/>
           )}/>
-       <Route exact path="/search" render={() => <Search 
-              bookSearch={bookSearch}
-              myBooks={books}
-              onSearch={this.searchFor}
-              onMove={this.switchShelf}
-              onResetSearch={this.resetSearch}/>}
-       />
+       <Route exact path="/search" render={() => (
+         <Search 
+           onSearch={this.searchBooks}
+           myBooks={books}
+           bookSearch={bookSearch}
+           onMove={this.switchShelf}
+           onClear={this.clearSearch}
+         />
+       )}/>
      </div>
     )
   }
