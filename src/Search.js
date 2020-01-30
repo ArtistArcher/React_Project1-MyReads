@@ -1,73 +1,84 @@
 // Search.js
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+// import Components
 import Book from './Book'
 
+// Define Search Component
 class Search extends Component {
-  render() {
-    const {bookSearch, onSearch, onResetSearch, books, /*myBooks,*/ onMove,} = this.props
-    console.log('bookSearch is ' + books)
-    /*console.log('myBooks is ' + myBooks)*/
-    return (
-      <div className="search-books">
-        <SearchBar onSearch={onSearch} onResetSearch={onResetSearch}/>
-        <SearchResults bookSearch={bookSearch} myBooks={bookSearch} onMove={onMove}/>
-      </div>
-    );
-  }
-}
-
-class SearchBar extends Component {
+  // Setup States for Search Component
   state = {
     value: '',
   }
-  manageChange = event => {
-    const v = event.target.value
-    this.setState({ value: v }, () => {
-      this.props.onSearch(v)
-    })
+  // Set Default Shelf to None
+  curShelf(book) {
+    console.log(book.title + ' shelf is ' + book.shelf)
+    if(book.shelf === 'currentlyReading' || book.shelf === 'wantToRead' || book.shelf === 'read') {
+      return book.shelf
+    }
+    else {return 'none'}
   }
+ 
+  
   render() {
-    const {onResetSearch} = this.props
-    return(
-      <div className="search-books-bar">
-        <Link to="/">
-          <button className="close-search" onClick={onResetSearch}>Close</button>
-        </Link>
-        <div className="search-books-input-wrapper">
-          <input type="text" placeholder="Search by title or author"
-            value={this.state.value}
-            onChange={this.manageChange}
+    // Define Component Variables
+    const {onSearch, bookSearch, onMove, onClear, myBooks} = this.props
+
+
+  const updatedBooks = bookSearch.map(book => {
+    myBooks.map(b => {
+      if (b.id === book.id) {
+        book.shelf = b.shelf;
+        console.log('test')
+      }
+      else {/*book.shelf = 'none'*/}
+      return b;
+    });
+    return book;
+  });
+    
+    // Function: Manage Change of Input Field
+    const manageChange = event => {
+      const v = event.target.value
+      this.setState({value: v}, () => {
+        onSearch(v)
+      })
+    }
+/*
+    const shelf = 'read'
+    const whatShelf = myBooks.filter(book => book.shelf === book.shelf ? book.shelf : 'none')
+    //console.log("BookShelf: " + shelf.name)
+    let myShelf = 'none'
+    const checkShelf =  {
+      if() {
+      }
+    }
+*/
+    return (
+      <div className="search-books">
+        <div className="search-books-bar">
+          <Link to="/">
+            <button className="close-search" onClick={onClear}>Close</button>
+          </Link>
+          <div className="search-books-input-wrapper">
+            <input type="text" placeholder="Search by title or author"
+              value={this.state.value}
+              onChange={manageChange}
             autoFocus />
+          </div>
+        </div>
+        <div className="search-books-results">
+          <ol className="books-grid">
+            {updatedBooks.map(book =>
+              //book.shelf
+              <Book key={book.id} book={book} shelf={book.shelf ? book.shelf : 'none'} onMove={onMove}/>
+             )}
+          </ol>
         </div>
       </div>
     )
   }
 }
 
-class SearchResults extends Component {
-  render() {
-    const {bookSearch, myBooks, onMove} = this.props;
-    console.log('bookSearch is ' + bookSearch)
-    const updatedBooks = bookSearch.map(book => {
-      myBooks.map(b => {
-        if (b.id === book.id) {
-          book.shelf = b.shelf;
-        }
-        return b;
-      });
-      return book;
-    });
-    return(
-      <div className="search-books-results">
-        <ol className="books-grid">
-        {updatedBooks.map(book => (
-          <Book key={book.id} book={book} shelf={book.shelf ? book.shelf : "none"} onMove={onMove}/>
-        ))}
-        </ol>
-      </div>
-    )
-  }
-}
 
 export default Search

@@ -1,12 +1,14 @@
 // ListBooks.js
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+// import Components
 import BookShelf from './BookShelf'
 
+// Define ListBooks Component
 class ListBooks extends Component {
   render() {
     // Define Component Variables
-    const {bookshelves, books, onMove} = this.props;
+    const {books, onMove} = this.props
     
     return (
       <div className="list-books">
@@ -16,9 +18,9 @@ class ListBooks extends Component {
         <div className="list-books-content">
           <div>
             <div>
-              {bookshelves.map((shelf) => (
-                <BookShelf key={shelf.key} shelf={shelf} books={books} onMove={onMove}/>
-              ))}
+              <BookShelf key='curr' shelf='currentlyReading'  shelfName='Currently Reading' books={books} onMove={onMove}/>
+              <BookShelf key='want' shelf='wantToRead'  shelfName='Want to Read' books={books} onMove={onMove}/>
+              <BookShelf key='read' shelf='read'  shelfName='Read' books={books} onMove={onMove}/>
             </div>
             <div className="open-search">
               <Link to="search">
@@ -32,32 +34,5 @@ class ListBooks extends Component {
   }
 }
 
-/*
-class BookCase extends Component {
-  render() {
-    console.log("BookCase")
-    const { bookshelves, books, onMove } = this.props;
-    return(
-      <div>
-      {bookshelves.map((shelf) => (
-          <BookShelf key={shelf.key} shelf={shelf} books={books} onMove={onMove}/>
-        ))}
-      </div>
-    )
-  }
-}
-*/
-
-/*
-const OpenSearchButton = () => {
-  return (
-    <div className="open-search">
-      <Link to="search">
-        <button onClick={Link}>Add a Book</button>
-      </Link>
-    </div>
-  );
-};
-*/
 
 export default ListBooks

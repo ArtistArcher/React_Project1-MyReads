@@ -1,5 +1,6 @@
 // Book.js
 import React, { Component } from 'react'
+// import Components
 import ShelfChanger from './ShelfChanger'
 import noCover from './images/blank.png'
 
@@ -7,12 +8,14 @@ import noCover from './images/blank.png'
 class Book extends Component {
   render() {
     // Define Component Variables & Functions
-    const { book, shelf, onMove } = this.props
+    const {book, onMove, shelf} = this.props
     //console.log("Book:" + book.title + " on " + shelf)
-    // Create defaults for book cover and title
+    
+    // Create defaults for book cover, title & authors
     const bookImg = book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : noCover
     const title = book.title ? book.title : 'No Title'
     const authors = book.authors ? book.authors.join(', ') : 'Author Unknown'
+    //console.log(book.shelf)
     
     return (
       <li>
